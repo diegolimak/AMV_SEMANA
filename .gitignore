@@ -1,0 +1,22 @@
+# PDFs grandes (não versionar — usar Google Drive ou similar)
+*.pdf
+
+# Pastas do Claude AI
+.claude/
+
+# Arquivos de sistema Windows
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Arquivos de sistema macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+*.code-workspace
+
+# Logs
+*.log

@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Admin — Reunião Semanal AMV</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="js/data.js"></script>
+<style>
+:root{
+  --navy:#1E3A5F; --navy-d:#152B47; --blue:#1B7DC4;
+  --light:#7EC8E3; --ice:#EAF5FB; --ice2:#C8DFF0;
+  --offwhite:#F5F4F0; --white:#fff;
+  --body:#3A4A5C; --muted:#7A8999;
+  --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+  --line:rgba(30,58,95,.12); --lines:rgba(30,58,95,.22);
+  --grad:linear-gradient(135deg,#1E3A5F 0%,#1B7DC4 100%);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --sidebar:260px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:#F0F4F8;color:var(--body);-webkit-font-smoothing:antialiased;min-height:100vh;}
+input,textarea,select,button{font-family:inherit;}
+a{color:inherit;text-decoration:none;}
+
+/* ═══ LAYOUT ═══ */
+#shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+#sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--navy-d);
+  position:fixed;top:0;left:0;bottom:0;
+  display:flex;flex-direction:column;
+  z-index:200;overflow-y:auto;
+}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo img{height:30px;}
+.sb-logo .sb-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:10px;}
+
+.sb-nav{padding:16px 12px;flex:1;}
+.sb-section{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:14px 8px 6px;display:block;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 10px;border-radius:10px;
+  color:rgba(255,255,255,.55);font-size:13px;font-weight:500;
+  transition:all .18s;cursor:pointer;margin-bottom:2px;
+}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.sb-item.active{background:rgba(27,125,196,.3);color:#fff;border-left:2px solid var(--blue);}
+.sb-item .icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
+.sb-bottom{padding:16px 12px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:12px;border-radius:10px;border:none;
+  font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.sb-btn-primary{background:var(--blue);color:#fff;}
+.sb-btn-primary:hover{background:#1668a8;transform:translateY(-1px);}
+.sb-btn-secondary{background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);margin-top:8px;}
+.sb-btn-secondary:hover{background:rgba(255,255,255,.12);color:#fff;}
+
+/* MAIN */
+#main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+
+/* TOPBAR */
+#topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  padding:0 32px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.tb-breadcrumb{
+  font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+}
+.tb-breadcrumb b{color:var(--navy);}
+.tb-actions{display:flex;gap:8px;align-items:center;}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 18px;border-radius:10px;border:none;
+  font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  transition:all .18s;
+}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:var(--navy-d);}
+.btn-success{background:var(--ok);color:#fff;}
+.btn-success:hover{filter:brightness(1.1);}
+.btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--lines);}
+.btn-outline:hover{background:var(--ice);border-color:var(--blue);}
+.btn-danger{background:var(--bad);color:#fff;}
+.btn-sm{padding:6px 12px;font-size:10px;}
+
+/* CONTENT */
+#content{flex:1;padding:32px;}
+
+/* SECTION PANELS */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:28px;}
+.page-header h1{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:900;color:var(--navy);letter-spacing:-.01em;}
+.page-header p{font-size:13px;color:var(--muted);margin-top:4px;}
+
+/* CARDS */
+.card{
+  background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:24px;
+  margin-bottom:20px;
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;padding-bottom:14px;
+  border-bottom:1px solid var(--line);
+}
+.card-title{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:var(--navy);letter-spacing:.02em;}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.label{font-size:11px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;}
+.label .required{color:var(--bad);}
+.inp{
+  height:40px;padding:0 12px;border-radius:10px;
+  border:1.5px solid var(--line);background:#fff;
+  font-size:13px;color:var(--body);
+  transition:border .18s,box-shadow .18s;
+}
+.inp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,125,196,.12);}
+.inp-num{text-align:right;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--navy);}
+.inp-area{height:auto;padding:10px 12px;resize:vertical;min-height:80px;line-height:1.55;}
+.inp-hint{font-size:11px;color:var(--muted);}
+.inp-group{display:flex;gap:0;}
+.inp-group .inp{border-radius:10px 0 0 10px;flex:1;}
+.inp-group-addon{
+  height:40px;padding:0 12px;
+  background:var(--ice);border:1.5px solid var(--line);border-left:none;
+  border-radius:0 10px 10px 0;font-size:12px;color:var(--muted);
+  display:flex;align-items:center;white-space:nowrap;
+}
+
+/* CONSULTANT ROW */
+.consultant-block{
+  background:var(--offwhite);border:1px solid var(--line);
+  border-radius:14px;padding:20px;margin-bottom:14px;
+}
+.consultant-block-header{
+  display:flex;align-items:center;gap:14px;margin-bottom:16px;
+}
+.consultant-avatar{
+  width:52px;height:52px;border-radius:50%;
+  border:2px solid var(--ice2);background:var(--ice2);
+  object-fit:cover;cursor:pointer;position:relative;flex-shrink:0;
+}
+.avatar-wrap{position:relative;flex-shrink:0;}
+.avatar-change{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(30,58,95,.6);color:#fff;
+  display:none;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;transition:.15s;
+}
+.avatar-wrap:hover .avatar-change{display:flex;}
+.consultant-block-info .name{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:var(--navy);}
+.consultant-block-info .tipo{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.file-input{display:none;}
+
+/* ALINHAMENTOS */
+.align-item-row{
+  display:flex;gap:10px;align-items:flex-start;
+  margin-bottom:10px;
+}
+.align-item-row textarea{flex:1;}
+.btn-remove{
+  width:32px;height:32px;border-radius:8px;border:none;flex-shrink:0;
+  background:rgba(220,38,38,.1);color:var(--bad);
+  cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+  transition:.15s;margin-top:4px;
+}
+.btn-remove:hover{background:var(--bad);color:#fff;}
+.btn-add{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 16px;border-radius:10px;border:1.5px dashed var(--line);
+  background:transparent;color:var(--muted);font-size:13px;
+  cursor:pointer;transition:.18s;width:100%;margin-top:4px;
+}
+.btn-add:hover{border-color:var(--blue);color:var(--blue);background:var(--ice);}
+
+/* RANKING ITEM */
+.ranking-row{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border:1.5px solid var(--line);
+  border-radius:12px;padding:14px 16px;margin-bottom:10px;
+}
+.rank-num{
+  font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;
+  color:var(--blue);min-width:32px;text-align:center;
+}
+.ranking-row .form-grid-4{flex:1;margin:0;}
+
+/* PROGRESS INDICATORS */
+.stat-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--line);
+}
+.stat-row:last-child{border:none;}
+.stat-label{flex:1;font-size:12px;color:var(--body);font-weight:500;}
+.stat-inputs{display:flex;gap:6px;align-items:center;}
+.stat-sep{font-size:11px;color:var(--muted);}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:var(--navy);color:#fff;
+  padding:14px 20px;border-radius:12px;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.04em;
+  transform:translateY(100px);opacity:0;
+  transition:all .3s var(--ease);
+  display:flex;align-items:center;gap:10px;
+  max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+#toast.show{transform:none;opacity:1;}
+#toast .toast-icon{font-size:18px;}
+
+/* WEEK BADGE */
+.week-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--ice);border:1px solid var(--ice2);
+  border-radius:40px;padding:6px 16px;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;
+  color:var(--navy);
+}
+
+/* HISTORY TABLE */
+.history-table{width:100%;border-collapse:separate;border-spacing:0;}
+.history-table th{
+  background:var(--navy);color:#fff;
+  font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.1em;
+  padding:12px 16px;text-align:left;
+}
+.history-table th:first-child{border-radius:10px 0 0 10px;}
+.history-table th:last-child{border-radius:0 10px 10px 0;}
+.history-table td{
+  padding:12px 16px;font-size:13px;border-bottom:1px solid var(--line);
+  color:var(--body);
+}
+.history-table tr:last-child td{border:none;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--ice);padding:4px;border-radius:12px;width:fit-content;}
+.tab{
+  padding:8px 18px;border-radius:9px;border:none;background:transparent;
+  font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  cursor:pointer;transition:.18s;
+}
+.tab.active{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.summary-card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:18px;display:flex;align-items:center;gap:14px;
+}
+.summary-icon{width:44px;height:44px;border-radius:11px;background:var(--ice);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.summary-body .label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;}
+.summary-body .val{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--navy);}
+
+/* FOTO SECTION */
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.photo-card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;
+}
+.photo-card img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--ice2);}
+.photo-card .photo-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:var(--navy);}
+.photo-card .photo-role{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.photo-upload-btn{
+  padding:7px 14px;border-radius:8px;border:1.5px solid var(--line);
+  background:transparent;color:var(--navy);font-size:11px;font-weight:600;
+  cursor:pointer;transition:.15s;
+}
+.photo-upload-btn:hover{background:var(--ice);border-color:var(--blue);}
+
+/* RESPONSIVO */
+@media(max-width:1100px){
+  .form-grid,.form-grid-4{grid-template-columns:1fr 1fr;}
+  .summary-grid,.photo-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div id="shell">
+<!-- ═══ SIDEBAR ═══ -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <img src="assets/logo-horizontal-branca.png" alt="AMV">
+    <div class="sb-title">Painel Administrativo</div>
+  </div>
+  <nav class="sb-nav">
+    <span class="sb-section">Geral</span>
+    <div class="sb-item active" data-panel="semana" onclick="switchPanel(this)">
+      <span class="icon">📅</span> Configurar Semana
+    </div>
+    <div class="sb-item" data-panel="alinhamentos" onclick="switchPanel(this)">
+      <span class="icon">📌</span> Alinhamentos
+    </div>
+
+    <span class="sb-section">Time Thaís</span>
+    <div class="sb-item" data-panel="thais-geral" onclick="switchPanel(this)">
+      <span class="icon">📊</span> Números Gerais
+    </div>
+    <div class="sb-item" data-panel="thais-consultores" onclick="switchPanel(this)">
+      <span class="icon">👥</span> Consultores
+    </div>
+    <div class="sb-item" data-panel="thais-suporte" onclick="switchPanel(this)">
+      <span class="icon">📞</span> Suporte / Pré-Vendas
+    </div>
+
+    <span class="sb-section">Time Luiza</span>
+    <div class="sb-item" data-panel="luiza-geral" onclick="switchPanel(this)">
+      <span class="icon">📊</span> Números Gerais
+    </div>
+    <div class="sb-item" data-panel="luiza-consultores" onclick="switchPanel(this)">
+      <span class="icon">👥</span> Consultores
+    </div>
+    <div class="sb-item" data-panel="luiza-suporte" onclick="switchPanel(this)">
+      <span class="icon">📞</span> Suporte / Pré-Vendas
+    </div>
+
+    <span class="sb-section">Apresentação</span>
+    <div class="sb-item" data-panel="destaques" onclick="switchPanel(this)">
+      <span class="icon">⭐</span> Destaques
+    </div>
+    <div class="sb-item" data-panel="ranking" onclick="switchPanel(this)">
+      <span class="icon">🏆</span> Rankings
+    </div>
+    <div class="sb-item" data-panel="fotos" onclick="switchPanel(this)">
+      <span class="icon">📷</span> Fotos dos Consultores
+    </div>
+    <div class="sb-item" data-panel="historico" onclick="switchPanel(this)">
+      <span class="icon">📚</span> Histórico
+    </div>
+  </nav>
+  <div class="sb-bottom">
+    <button class="sb-btn sb-btn-primary" onclick="saveAll()">💾 Salvar Tudo</button>
+    <a href="index.html" target="_blank"><button class="sb-btn sb-btn-secondary">🎯 Ver Apresentação</button></a>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-breadcrumb">Admin / <b id="breadcrumb-current">Configurar Semana</b></div>
+    <div class="tb-actions">
+      <span class="week-badge" id="tb-week">—</span>
+      <button class="btn btn-success" onclick="saveAll()">💾 Salvar</button>
+      <a href="index.html" target="_blank"><button class="btn btn-outline">🎯 Apresentação</button></a>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ══ SEMANA ══ -->
+    <div class="panel active" id="panel-semana">
+      <div class="page-header">
+        <h1>Configurar Semana</h1>
+        <p>Defina o período da reunião semanal e informações gerais.</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Período da Semana</div><div class="card-sub">Ex: 19/05 a 25/05</div></div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="label">Data de Início</label>
+            <input type="date" class="inp" id="f-dataInicio">
+          </div>
+          <div class="form-group">
+            <label class="label">Data de Fim</label>
+            <input type="date" class="inp" id="f-dataFim">
+          </div>
+          <div class="form-group">
+            <label class="label">Período (exibido na capa)</label>
+            <input type="text" class="inp" id="f-semana" placeholder="Ex: 19/05 a 25/05">
+          </div>
+          <div class="form-group">
+            <label class="label">ID da Semana</label>
+            <input type="text" class="inp" id="f-id" placeholder="Ex: 2026-W22" readonly style="background:var(--offwhite);color:var(--muted);">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Resumo da Semana Atual</div></div>
+        <div class="summary-grid" id="summary-cards"></div>
+      </div>
+    </div>
+
+    <!-- ══ ALINHAMENTOS ══ -->
+    <div class="panel" id="panel-alinhamentos">
+      <div class="page-header">
+        <h1>Alinhamentos da Semana</h1>
+        <p>Adicione os alinhamentos que serão exibidos no segundo slide da apresentação.</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Lista de Alinhamentos</div>
+          <button class="btn btn-outline btn-sm" onclick="addAlinhamento()">+ Adicionar</button>
+        </div>
+        <div id="alinhamentos-list"></div>
+        <button class="btn-add" onclick="addAlinhamento()">+ Adicionar novo alinhamento</button>
+      </div>
+    </div>
+
+    <!-- ══ THAÍS GERAL ══ -->
+    <div class="panel" id="panel-thais-geral">
+      <div class="page-header">
+        <h1>Time Thaís — Números Gerais</h1>
+        <p>Resultados consolidados do time da gestora Thaís.</p>
+      </div>
+      <div class="card" id="thais-geral-form"></div>
+    </div>
+
+    <!-- ══ THAÍS CONSULTORES ══ -->
+    <div class="panel" id="panel-thais-consultores">
+      <div class="page-header">
+        <h1>Time Thaís — Consultores</h1>
+        <p>Números individuais de cada consultor do time da Thaís.</p>
+      </div>
+      <div id="thais-consultores-forms"></div>
+    </div>
+
+    <!-- ══ THAÍS SUPORTE ══ -->
+    <div class="panel" id="panel-thais-suporte">
+      <div class="page-header">
+        <h1>Time Thaís — Suporte</h1>
+        <p>Pré-vendas (Sara, Leticia) e Backoffice (Marjorie).</p>
+      </div>
+      <div id="thais-suporte-forms"></div>
+    </div>
+
+    <!-- ══ LUIZA GERAL ══ -->
+    <div class="panel" id="panel-luiza-geral">
+      <div class="page-header">
+        <h1>Time Luiza — Números Gerais</h1>
+        <p>Resultados consolidados do time da gestora Luiza.</p>
+      </div>
+      <div class="card" id="luiza-geral-form"></div>
+    </div>
+
+    <!-- ══ LUIZA CONSULTORES ══ -->
+    <div class="panel" id="panel-luiza-consultores">
+      <div class="page-header">
+        <h1>Time Luiza — Consultores</h1>
+        <p>Números individuais de cada consultor do time da Luiza.</p>
+      </div>
+      <div id="luiza-consultores-forms"></div>
+    </div>
+
+    <!-- ══ LUIZA SUPORTE ══ -->
+    <div class="panel" id="panel-luiza-suporte">
+      <div class="page-header">
+        <h1>Time Luiza — Suporte</h1>
+        <p>Pré-vendas (Maria Cecilia) e Backoffice (Bianca).</p>
+      </div>
+      <div id="luiza-suporte-forms"></div>
+    </div>
+
+    <!-- ══ DESTAQUES ══ -->
+    <div class="panel" id="panel-destaques">
+      <div class="page-header">
+        <h1>Destaques da Semana</h1>
+        <p>Consultores que se destacaram nesta semana.</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏆 Mais Reuniões Realizadas</div></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="label">Nome do Consultor</label>
+            <input type="text" class="inp" id="dest-reunioes-nome" placeholder="Ex: Victor Matera">
+          </div>
+          <div class="form-group">
+            <label class="label">Time</label>
+            <select class="inp" id="dest-reunioes-time">
+              <option value="Thaís">Thaís</option>
+              <option value="Luiza">Luiza</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Número de Reuniões</label>
+            <input type="number" class="inp inp-num" id="dest-reunioes-valor" min="0">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🎯 Mais Indicações</div></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="label">Nome do Consultor</label>
+            <input type="text" class="inp" id="dest-indicacoes-nome" placeholder="Ex: Gisele Cristina">
+          </div>
+          <div class="form-group">
+            <label class="label">Time</label>
+            <select class="inp" id="dest-indicacoes-time">
+              <option value="Thaís">Thaís</option>
+              <option value="Luiza">Luiza</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Número de Indicações</label>
+            <input type="number" class="inp inp-num" id="dest-indicacoes-valor" min="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RANKING ══ -->
+    <div class="panel" id="panel-ranking">
+      <div class="page-header">
+        <h1>Rankings</h1>
+        <p>Ranking acumulado do ano — atualizado semanalmente.</p>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchRankTab(this,'amv')">AMV & Júnior</button>
+        <button class="tab" onclick="switchRankTab(this,'pleno')">Pleno</button>
+        <button class="tab" onclick="switchRankTab(this,'trainee')">Trainees</button>
+      </div>
+      <div id="rank-tab-amv">
+        <div class="card" id="rank-amv-form"></div>
+      </div>
+      <div id="rank-tab-pleno" style="display:none">
+        <div class="card" id="rank-pleno-form"></div>
+      </div>
+      <div id="rank-tab-trainee" style="display:none">
+        <div class="card" id="rank-trainee-form"></div>
+      </div>
+    </div>
+
+    <!-- ══ FOTOS ══ -->
+    <div class="panel" id="panel-fotos">
+      <div class="page-header">
+        <h1>Fotos dos Consultores</h1>
+        <p>Clique na foto para trocar. As imagens são salvas localmente.</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Time Thaís</div></div>
+        <div class="photo-grid" id="fotos-thais"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Time Luiza</div></div>
+        <div class="photo-grid" id="fotos-luiza"></div>
+      </div>
+    </div>
+
+    <!-- ══ HISTÓRICO ══ -->
+    <div class="panel" id="panel-historico">
+      <div class="page-header">
+        <h1>Histórico Semanal</h1>
+        <p>Registro de todas as semanas anteriores.</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Semanas Registradas</div>
+          <button class="btn btn-outline btn-sm" onclick="archiveWeek()">📦 Arquivar Semana Atual</button>
+        </div>
+        <div id="history-content">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Semana</th>
+                <th>Time Thaís — Vidas</th>
+                <th>Time Luiza — Vidas</th>
+                <th>Reuniões (Total)</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- TOAST -->
+<div id="toast"><span class="toast-icon">✅</span><span id="toast-msg">Dados salvos com sucesso!</span></div>
+
+<script>
+/* ═══ STATE ═══ */
+let D = AMV.load();
+
+/* ═══ UTILS ═══ */
+const $ = id => document.getElementById(id);
+const num = id => parseInt($(id).value)||0;
+const str = id => $(id).value.trim();
+
+function showToast(msg, icon='✅') {
+  const t = $('toast');
+  $('toast-icon').textContent = icon;
+  $('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ═══ SIDEBAR NAVIGATION ═══ */
+function switchPanel(el) {
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const panel = el.dataset.panel;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  $('panel-'+panel).classList.add('active');
+  $('breadcrumb-current').textContent = el.textContent.trim();
+}
+
+function switchRankTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['amv','pleno','trainee'].forEach(t => {
+    $('rank-tab-'+t).style.display = t===tab?'block':'none';
+  });
+}
+
+/* ═══ INIT FORMS ═══ */
+function initAll() {
+  initSemana();
+  initAlinhamentos();
+  initGeralForm('thais', D.timeThais.geral);
+  initGeralForm('luiza', D.timeLuiza.geral);
+  initConsultoresForm('thais', D.timeThais.consultores);
+  initConsultoresForm('luiza', D.timeLuiza.consultores);
+  initSuporteForm('thais', D.timeThais);
+  initSuporteForm('luiza', D.timeLuiza);
+  initDestaques();
+  initRankings();
+  initFotos();
+  initHistorico();
+  updateWeekBadge();
+  renderSummary();
+}
+
+/* ── SEMANA ── */
+function initSemana() {
+  $('f-dataInicio').value = D.dataInicio||'';
+  $('f-dataFim').value    = D.dataFim||'';
+  $('f-semana').value     = D.semana||'';
+  $('f-id').value         = D.id||'';
+  $('f-dataInicio').addEventListener('change', updateWeekAuto);
+  $('f-dataFim').addEventListener('change', updateWeekAuto);
+}
+
+function updateWeekAuto() {
+  const ini = $('f-dataInicio').value;
+  const fim = $('f-dataFim').value;
+  if(ini && fim) {
+    const f = d => { const [y,m,dd]=d.split('-'); return `${dd}/${m}`; };
+    $('f-semana').value = `${f(ini)} a ${f(fim)}`;
+    const date = new Date(ini);
+    const wk = getWeekNumber(date);
+    $('f-id').value = `${date.getFullYear()}-W${String(wk).padStart(2,'0')}`;
+  }
+  updateWeekBadge();
+}
+
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));
+  return Math.ceil(((d-new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000+1)/7);
+}
+
+function updateWeekBadge() {
+  const s = $('f-semana').value||D.semana||'—';
+  $('tb-week').textContent = '📅 ' + s;
+}
+
+function renderSummary() {
+  const tt = D.timeThais.geral;
+  const tl = D.timeLuiza.geral;
+  const items = [
+    { icon:'🤝', label:'Total Reuniões', val: (tt.reunioesRealizadas.valor||0)+(tl.reunioesRealizadas.valor||0) },
+    { icon:'💙', label:'Total Vidas', val: (tt.vidas.valor||0)+(tl.vidas.valor||0) },
+    { icon:'🏢', label:'Vidas Implantadas', val: (tt.vidasImplantadas.valor||0)+(tl.vidasImplantadas.valor||0) },
+    { icon:'📣', label:'Total Indicações', val: (tt.indicacoes.valor||0)+(tl.indicacoes.valor||0) }
+  ];
+  $('summary-cards').innerHTML = items.map(i=>`
+    <div class="summary-card">
+      <div class="summary-icon">${i.icon}</div>
+      <div class="summary-body">
+        <div class="label">${i.label}</div>
+        <div class="val">${i.val}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── ALINHAMENTOS ── */
+function initAlinhamentos() {
+  const list = $('alinhamentos-list');
+  list.innerHTML = '';
+  (D.alinhamentos||[]).forEach(a => addAlinhamentoItem(a));
+}
+
+function addAlinhamento() { addAlinhamentoItem(''); }
+
+function addAlinhamentoItem(text) {
+  const row = document.createElement('div');
+  row.className = 'align-item-row';
+  row.innerHTML = `<textarea class="inp inp-area" style="min-height:60px;" placeholder="Digite o alinhamento...">${text}</textarea>
+    <button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
+  $('alinhamentos-list').appendChild(row);
+}
+
+/* ── GERAL FORM ── */
+function initGeralForm(team, g) {
+  const el = $(`${team}-geral-form`);
+  el.innerHTML = `
+    <div class="card-header"><div class="card-title">Indicadores Gerais</div></div>
+    ${geralFields(team, g)}`;
+}
+
+function geralFields(team, g) {
+  const fields = [
+    { key:'reunioesRealizadas', label:'Reuniões Realizadas', icon:'🤝' },
+    { key:'capasEnviadas',      label:'Capas Enviadas',      icon:'📄' },
+    { key:'vidas',              label:'Vidas',               icon:'💙' },
+    { key:'indicacoes',         label:'Indicações Coletadas', icon:'📣' }
+  ];
+  return `
+    <div class="form-grid">
+      ${fields.map(f => `
+        <div class="form-group">
+          <label class="label">${f.icon} ${f.label}</label>
+          <div class="stat-inputs" style="display:flex;gap:8px;align-items:center;">
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Realizado</div>
+              <input type="number" class="inp inp-num" id="${team}-${f.key}-v" value="${g[f.key]?.valor||0}" min="0"></div>
+            <div class="stat-sep" style="margin-top:18px;">/</div>
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Meta</div>
+              <input type="number" class="inp inp-num" id="${team}-${f.key}-m" value="${g[f.key]?.meta||0}" min="0"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px;">
+      <div class="card-title" style="margin-bottom:14px;">📦 Implantações & Pós-Vendas</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="label">Vidas Implantadas</label>
+          <input type="number" class="inp inp-num" id="${team}-vidasImplantadas-v" value="${g.vidasImplantadas?.valor||0}" min="0">
+        </div>
+        <div class="form-group">
+          <label class="label">Contratos Implantados</label>
+          <input type="number" class="inp inp-num" id="${team}-vidasImplantadas-c" value="${g.vidasImplantadas?.contratos||0}" min="0">
+        </div>
+        <div class="form-group">
+          <label class="label">Pós-Vendas Realizados</label>
+          <input type="number" class="inp inp-num" id="${team}-posVendas-v" value="${g.posVendas?.valor||0}" min="0">
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── CONSULTORES ── */
+function initConsultoresForm(team, consultores) {
+  const el = $(`${team}-consultores-forms`);
+  el.innerHTML = consultores.map(c => consultorBlock(team, c)).join('');
+}
+
+function consultorBlock(team, c) {
+  const stats = [
+    { key:'reunioes',   label:'Reuniões',   vv:c.reunioes.v,   vm:c.reunioes.m   },
+    { key:'capas',      label:'Capas',      vv:c.capas.v,      vm:c.capas.m      },
+    { key:'vidas',      label:'Vidas',      vv:c.vidas.v,      vm:c.vidas.m      },
+    { key:'posVendas',  label:'Pós-Vendas', vv:c.posVendas.v,  vm:c.posVendas.m  },
+    { key:'indicacoes', label:'Indicações', vv:c.indicacoes.v, vm:c.indicacoes.m }
+  ];
+  return `
+    <div class="card consultant-block" id="block-${team}-${c.id}">
+      <div class="consultant-block-header">
+        <div class="avatar-wrap">
+          <img class="consultant-avatar" id="foto-${team}-${c.id}" src="${c.foto||'assets/photos/placeholder.svg'}" alt="${c.nome}" onerror="this.src='assets/photos/placeholder.svg'">
+          <div class="avatar-change" onclick="triggerPhotoUpload('${team}','${c.id}')">📷</div>
+        </div>
+        <div class="consultant-block-info">
+          <div class="name">${c.nome}</div>
+          <div class="tipo">${c.tipo.toUpperCase()}</div>
+        </div>
+      </div>
+      <input type="file" accept="image/*" class="file-input" id="file-${team}-${c.id}" onchange="handlePhoto(event,'${team}','${c.id}')">
+      <div class="form-grid-4">
+        ${stats.map(s=>`
+          <div class="form-group">
+            <label class="label">${s.label}</label>
+            <div class="stat-inputs" style="display:flex;gap:6px;">
+              <div style="flex:1;"><div class="inp-hint" style="margin-bottom:3px;">Real.</div>
+                <input type="number" class="inp inp-num" id="${team}-${c.id}-${s.key}-v" value="${s.vv}" min="0"></div>
+              <div class="stat-sep" style="margin-top:18px;">/</div>
+              <div style="flex:1;"><div class="inp-hint" style="margin-bottom:3px;">Meta</div>
+                <input type="number" class="inp inp-num" id="${team}-${c.id}-${s.key}-m" value="${s.vm}" min="0"></div>
+            </div>
+          </div>`).join('')}
+        <div class="form-group">
+          <label class="label">Vidas Implant.</label>
+          <div class="stat-inputs" style="display:flex;gap:6px;">
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:3px;">Vidas</div>
+              <input type="number" class="inp inp-num" id="${team}-${c.id}-impl-v" value="${c.implantados.v}" min="0"></div>
+            <div class="stat-sep" style="margin-top:18px;">·</div>
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:3px;">Contr.</div>
+              <input type="number" class="inp inp-num" id="${team}-${c.id}-impl-c" value="${c.implantados.c}" min="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── SUPORTE / PRÉ-VENDAS ── */
+function initSuporteForm(team, teamData) {
+  const el = $(`${team}-suporte-forms`);
+  let html = '';
+  teamData.backoffice.forEach(b => {
+    html += `
+    <div class="card">
+      <div class="card-header"><div class="card-title">📋 Backoffice — ${b.nome}</div></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="label">Atividades Realizadas</label>
+          <div class="stat-inputs" style="display:flex;gap:8px;">
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Realizado</div>
+              <input type="number" class="inp inp-num" id="${team}-bo-${b.id}-v" value="${b.atividades}" min="0"></div>
+            <div class="stat-sep" style="margin-top:18px;">/</div>
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Meta</div>
+              <input type="number" class="inp inp-num" id="${team}-bo-${b.id}-m" value="${b.meta}" min="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  teamData.preVendas.forEach(pv => {
+    html += `
+    <div class="card">
+      <div class="card-header"><div class="card-title">📞 Pré-Vendas — ${pv.nome}</div></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="label">Atividades Realizadas</label>
+          <div class="stat-inputs" style="display:flex;gap:8px;">
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Real.</div><input type="number" class="inp inp-num" id="${team}-pv-${pv.id}-atv-v" value="${pv.atividadesV}" min="0"></div>
+            <div class="stat-sep" style="margin-top:18px;">/</div>
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Meta</div><input type="number" class="inp inp-num" id="${team}-pv-${pv.id}-atv-m" value="${pv.atividadesM}" min="0"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Reuniões Agendadas</label>
+          <div class="stat-inputs" style="display:flex;gap:8px;">
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Real.</div><input type="number" class="inp inp-num" id="${team}-pv-${pv.id}-ag-v" value="${pv.agendadasV}" min="0"></div>
+            <div class="stat-sep" style="margin-top:18px;">/</div>
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Meta</div><input type="number" class="inp inp-num" id="${team}-pv-${pv.id}-ag-m" value="${pv.agendadasM}" min="0"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Reuniões Realizadas</label>
+          <div class="stat-inputs" style="display:flex;gap:8px;">
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Real.</div><input type="number" class="inp inp-num" id="${team}-pv-${pv.id}-rea-v" value="${pv.realizadasV}" min="0"></div>
+            <div class="stat-sep" style="margin-top:18px;">/</div>
+            <div style="flex:1;"><div class="inp-hint" style="margin-bottom:4px;">Meta</div><input type="number" class="inp inp-num" id="${team}-pv-${pv.id}-rea-m" value="${pv.realizadasM}" min="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+/* ── DESTAQUES ── */
+function initDestaques() {
+  $('dest-reunioes-nome').value  = D.destaques.reunioes.nome||'';
+  $('dest-reunioes-time').value  = D.destaques.reunioes.time||'Thaís';
+  $('dest-reunioes-valor').value = D.destaques.reunioes.valor||0;
+  $('dest-indicacoes-nome').value  = D.destaques.indicacoes.nome||'';
+  $('dest-indicacoes-time').value  = D.destaques.indicacoes.time||'Thaís';
+  $('dest-indicacoes-valor').value = D.destaques.indicacoes.valor||0;
+}
+
+/* ── RANKINGS ── */
+function initRankings() {
+  renderRankForm('rank-amv-form', D.rankingAmvJunior);
+  renderRankForm('rank-pleno-form', D.rankingPleno);
+  renderRankForm('rank-trainee-form', D.rankingTrainee);
+}
+
+function renderRankForm(elId, list) {
+  const el = $(elId);
+  el.innerHTML = `
+    <div class="card-header">
+      <div class="card-title">Posições do Ranking</div>
+    </div>
+    ${list.map((r,i) => `
+    <div class="ranking-row">
+      <div class="rank-num">${['🥇','🥈','🥉'][i]||r.pos+'°'}</div>
+      <div class="form-grid-4" style="flex:1;gap:10px;">
+        <div class="form-group"><label class="label">Nome</label>
+          <input type="text" class="inp" id="${elId}-${i}-nome" value="${r.nome}"></div>
+        <div class="form-group"><label class="label">Vidas</label>
+          <input type="number" class="inp inp-num" id="${elId}-${i}-vidas" value="${r.vidas}" min="0"></div>
+        <div class="form-group"><label class="label">Contratos</label>
+          <input type="number" class="inp inp-num" id="${elId}-${i}-contratos" value="${r.contratos}" min="0"></div>
+        <div class="form-group"><label class="label">Período</label>
+          <input type="text" class="inp" id="${elId}-${i}-periodo" value="${r.periodo}"></div>
+      </div>
+    </div>`).join('')}`;
+}
+
+/* ── FOTOS ── */
+function initFotos() {
+  renderFotoGrid('fotos-thais', D.timeThais.consultores, 'thais');
+  renderFotoGrid('fotos-luiza', D.timeLuiza.consultores, 'luiza');
+}
+
+function renderFotoGrid(elId, consultores, team) {
+  $(elId).innerHTML = consultores.map(c => `
+    <div class="photo-card">
+      <img id="fotogrid-${team}-${c.id}" src="${c.foto||'assets/photos/placeholder.svg'}" alt="${c.nome}" onerror="this.src='assets/photos/placeholder.svg'">
+      <div class="photo-name">${c.nome}</div>
+      <div class="photo-role">${c.tipo}</div>
+      <button class="photo-upload-btn" onclick="triggerPhotoUpload('${team}','${c.id}')">📷 Trocar Foto</button>
+      <input type="file" accept="image/*" class="file-input" id="file-${team}-${c.id}" onchange="handlePhoto(event,'${team}','${c.id}')">
+    </div>`).join('');
+}
+
+function triggerPhotoUpload(team, id) {
+  $(`file-${team}-${id}`).click();
+}
+
+function handlePhoto(event, team, id) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    // update consultant foto in D
+    const teamData = team==='thais' ? D.timeThais : D.timeLuiza;
+    const c = teamData.consultores.find(x=>x.id===id);
+    if(c) c.foto = data;
+    // update preview images
+    const imgs = document.querySelectorAll(`[id$="-${team}-${id}"]`);
+    imgs.forEach(img => { if(img.tagName==='IMG') img.src = data; });
+    showToast(`Foto de ${c?.nome||id} atualizada!`, '📷');
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── HISTÓRICO ── */
+function initHistorico() {
+  const hist = AMV.loadHistory();
+  const tbody = $('history-body');
+  if(!hist.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Nenhuma semana arquivada ainda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = hist.map(h => `
+    <tr>
+      <td><b>${h.semana||h.id}</b></td>
+      <td>${h.timeThais?.geral?.vidas?.valor||0} vidas</td>
+      <td>${h.timeLuiza?.geral?.vidas?.valor||0} vidas</td>
+      <td>${(h.timeThais?.geral?.reunioesRealizadas?.valor||0)+(h.timeLuiza?.geral?.reunioesRealizadas?.valor||0)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="loadHistoryItem('${h.id}')">📂 Carregar</button>
+      </td>
+    </tr>`).join('');
+}
+
+function loadHistoryItem(id) {
+  const hist = AMV.loadHistory();
+  const item = hist.find(h=>h.id===id);
+  if(item) {
+    if(confirm(`Carregar a semana "${item.semana}"? Os dados atuais não salvos serão perdidos.`)) {
+      D = JSON.parse(JSON.stringify(item));
+      initAll();
+      showToast(`Semana "${item.semana}" carregada!`, '📂');
+    }
+  }
+}
+
+function archiveWeek() {
+  collectAll();
+  AMV.save(D);
+  AMV.archiveCurrentWeek();
+  initHistorico();
+  showToast('Semana arquivada com sucesso!', '📦');
+}
+
+/* ═══ COLLECT (read form → D) ═══ */
+function collectAll() {
+  // Semana
+  D.dataInicio = $('f-dataInicio').value;
+  D.dataFim    = $('f-dataFim').value;
+  D.semana     = str('f-semana');
+  D.id         = str('f-id');
+
+  // Alinhamentos
+  D.alinhamentos = [...$('alinhamentos-list').querySelectorAll('textarea')].map(t=>t.value.trim()).filter(Boolean);
+
+  // Geral Thaís
+  collectGeral('thais', D.timeThais.geral);
+  collectGeral('luiza', D.timeLuiza.geral);
+
+  // Consultores
+  collectConsultores('thais', D.timeThais.consultores);
+  collectConsultores('luiza', D.timeLuiza.consultores);
+
+  // Suporte
+  collectSuporte('thais', D.timeThais);
+  collectSuporte('luiza', D.timeLuiza);
+
+  // Destaques
+  D.destaques.reunioes  = { nome:str('dest-reunioes-nome'),  time:$('dest-reunioes-time').value,  valor:num('dest-reunioes-valor')  };
+  D.destaques.indicacoes= { nome:str('dest-indicacoes-nome'),time:$('dest-indicacoes-time').value, valor:num('dest-indicacoes-valor') };
+
+  // Rankings
+  collectRanking('rank-amv-form', D.rankingAmvJunior);
+  collectRanking('rank-pleno-form', D.rankingPleno);
+  collectRanking('rank-trainee-form', D.rankingTrainee);
+}
+
+function collectGeral(team, g) {
+  ['reunioesRealizadas','capasEnviadas','vidas','indicacoes'].forEach(k => {
+    g[k].valor = num(`${team}-${k}-v`);
+    g[k].meta  = num(`${team}-${k}-m`);
+  });
+  g.vidasImplantadas.valor    = num(`${team}-vidasImplantadas-v`);
+  g.vidasImplantadas.contratos= num(`${team}-vidasImplantadas-c`);
+  g.posVendas.valor           = num(`${team}-posVendas-v`);
+}
+
+function collectConsultores(team, consultores) {
+  consultores.forEach(c => {
+    ['reunioes','capas','vidas','posVendas','indicacoes'].forEach(k => {
+      const kel = $(`${team}-${c.id}-${k}-v`);
+      const mel = $(`${team}-${c.id}-${k}-m`);
+      if(kel) { c[k].v = parseInt(kel.value)||0; c[k].m = parseInt(mel.value)||0; }
+    });
+    const iv = $(`${team}-${c.id}-impl-v`);
+    const ic = $(`${team}-${c.id}-impl-c`);
+    if(iv) { c.implantados.v = parseInt(iv.value)||0; c.implantados.c = parseInt(ic.value)||0; }
+  });
+}
+
+function collectSuporte(team, teamData) {
+  teamData.backoffice.forEach(b => {
+    const v = $(`${team}-bo-${b.id}-v`);
+    const m = $(`${team}-bo-${b.id}-m`);
+    if(v) { b.atividades = parseInt(v.value)||0; b.meta = parseInt(m.value)||0; }
+  });
+  teamData.preVendas.forEach(pv => {
+    const keys = [['atv','atividadesV','atividadesM'],['ag','agendadasV','agendadasM'],['rea','realizadasV','realizadasM']];
+    keys.forEach(([k,vf,mf]) => {
+      const ve = $(`${team}-pv-${pv.id}-${k}-v`);
+      const me = $(`${team}-pv-${pv.id}-${k}-m`);
+      if(ve) { pv[vf] = parseInt(ve.value)||0; pv[mf] = parseInt(me.value)||0; }
+    });
+  });
+}
+
+function collectRanking(elId, list) {
+  list.forEach((r,i) => {
+    const n = $(`${elId}-${i}-nome`);
+    if(n) {
+      r.nome      = n.value.trim();
+      r.vidas     = parseInt($(`${elId}-${i}-vidas`).value)||0;
+      r.contratos = parseInt($(`${elId}-${i}-contratos`).value)||0;
+      r.periodo   = $(`${elId}-${i}-periodo`).value.trim();
+    }
+  });
+}
+
+/* ═══ SAVE ALL ═══ */
+function saveAll() {
+  collectAll();
+  AMV.save(D);
+  renderSummary();
+  updateWeekBadge();
+  showToast('Dados salvos! Apresentação atualizada.', '✅');
+}
+
+/* ═══ INIT ═══ */
+initAll();
+</script>
+</body>
+</html>
