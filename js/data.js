@@ -17,6 +17,10 @@ const AMV = (() => {
       'DESCONTO BRADESCO: Prorrogada a campanha até dia 29/05',
       'ALINHAMENTOS POR EMAIL: Sempre que precisarem sair mais cedo, tiverem consultas, atestado, etc — depois de alinhar com a gestora, formalizar por email para GESTORA, JESSICA E LEANDRO'
     ],
+    gestoras: {
+      thais: { nome:'Thaís', foto:'assets/photos/Thais.jpg' },
+      luiza: { nome:'Luiza', foto:'assets/photos/Luiza.jpg' }
+    },
     timeThais: {
       geral: {
         reunioesRealizadas: { valor: 20, meta: 35 },
@@ -27,25 +31,25 @@ const AMV = (() => {
         posVendas:          { valor: 7  }
       },
       consultores: [
-        { id:'rodrigo',  nome:'Rodrigo Veras',   tipo:'pleno',   foto:'assets/photos/rodrigo.svg',
+        { id:'rodrigo',  nome:'Rodrigo Veras',   tipo:'pleno',   foto:'assets/photos/Rodrigo.png',
           reunioes:{ v:10, m:6  }, capas:{ v:2, m:2 }, vidas:{ v:8, m:5  },
           posVendas:{ v:1, m:5 }, indicacoes:{ v:5, m:5 }, implantados:{ v:5, c:0 } },
-        { id:'thiago',   nome:'Thiago Vaz',      tipo:'amv',     foto:'assets/photos/thiago.svg',
+        { id:'thiago',   nome:'Thiago Vaz',      tipo:'amv',     foto:'assets/photos/Thiago.JPG',
           reunioes:{ v:3,  m:10 }, capas:{ v:2, m:2 }, vidas:{ v:5, m:8  },
           posVendas:{ v:1, m:5 }, indicacoes:{ v:7, m:5 }, implantados:{ v:5, c:0 } },
-        { id:'vitorL',   nome:'Vitor Lorran',    tipo:'trainee', foto:'assets/photos/vitor-lorran.svg',
+        { id:'vitorL',   nome:'Vitor Lorran',    tipo:'trainee', foto:'assets/photos/Vitor.jpg',
           reunioes:{ v:6,  m:10 }, capas:{ v:2, m:2 }, vidas:{ v:7, m:4  },
           posVendas:{ v:3, m:5 }, indicacoes:{ v:7, m:5 }, implantados:{ v:18, c:3 } },
-        { id:'gisele',   nome:'Gisele Cristina', tipo:'amv',     foto:'assets/photos/gisele.svg',
+        { id:'gisele',   nome:'Gisele Cristina', tipo:'amv',     foto:'assets/photos/Giselle.JPG',
           reunioes:{ v:5,  m:10 }, capas:{ v:1, m:2 }, vidas:{ v:6, m:8  },
           posVendas:{ v:0, m:5 }, indicacoes:{ v:1, m:5 }, implantados:{ v:5, c:0 } }
       ],
       backoffice: [
-        { id:'marjorie', nome:'Marjorie', foto:'assets/photos/marjorie.svg', atividades:4, meta:10 }
+        { id:'marjorie', nome:'Marjorie', foto:'assets/photos/Marjorie.jpg', atividades:4, meta:10 }
       ],
       preVendas: [
-        { id:'sara',    nome:'Sara',    foto:'assets/photos/sara.svg',    atividadesV:4, atividadesM:10, agendadasV:2, agendadasM:2, realizadasV:0, realizadasM:8 },
-        { id:'leticia', nome:'Leticia', foto:'assets/photos/leticia.svg', atividadesV:4, atividadesM:10, agendadasV:0, agendadasM:2, realizadasV:5, realizadasM:8 }
+        { id:'sara',    nome:'Sarah',   foto:'assets/photos/Sarah.png',   atividadesV:4, atividadesM:10, agendadasV:2, agendadasM:2, realizadasV:0, realizadasM:8 },
+        { id:'leticia', nome:'Leticia', foto:'assets/photos/Leticia.png', atividadesV:4, atividadesM:10, agendadasV:0, agendadasM:2, realizadasV:5, realizadasM:8 }
       ]
     },
     timeLuiza: {
@@ -58,21 +62,21 @@ const AMV = (() => {
         posVendas:          { valor: 2  }
       },
       consultores: [
-        { id:'matheus', nome:'Matheus Prado',  tipo:'amv',     foto:'assets/photos/matheus.svg',
+        { id:'matheus', nome:'Matheus Prado',  tipo:'amv',     foto:'assets/photos/Matheus.jpg',
           reunioes:{ v:4, m:10 }, capas:{ v:2, m:2 }, vidas:{ v:5, m:8  },
           posVendas:{ v:0, m:5 }, indicacoes:{ v:5, m:5 }, implantados:{ v:3, c:1 } },
-        { id:'vitorM',  nome:'Vitor',          tipo:'amv',     foto:'assets/photos/vitor-m.svg',
+        { id:'vitorM',  nome:'Victor Matera',  tipo:'amv',     foto:'assets/photos/Victor.jpg',
           reunioes:{ v:0, m:10 }, capas:{ v:0, m:2 }, vidas:{ v:0, m:8  },
           posVendas:{ v:0, m:5 }, indicacoes:{ v:0, m:5 }, implantados:{ v:0, c:0 } },
-        { id:'kaike',   nome:'Kaike Augusto',  tipo:'trainee', foto:'assets/photos/kaike.svg',
+        { id:'kaike',   nome:'Kaike Augusto',  tipo:'trainee', foto:'assets/photos/Kaike.jpg',
           reunioes:{ v:6, m:7  }, capas:{ v:1, m:2 }, vidas:{ v:0, m:5  },
           posVendas:{ v:0, m:5 }, indicacoes:{ v:0, m:5 }, implantados:{ v:0, c:0 } },
-        { id:'kariny',  nome:'Kariny Coelho',  tipo:'trainee', foto:'assets/photos/kariny.svg',
+        { id:'kariny',  nome:'Kariny Coelho',  tipo:'trainee', foto:'assets/photos/Kariny.JPG',
           reunioes:{ v:4, m:5  }, capas:{ v:1, m:2 }, vidas:{ v:0, m:4  },
           posVendas:{ v:0, m:5 }, indicacoes:{ v:3, m:6 }, implantados:{ v:0, c:0 } }
       ],
       backoffice: [
-        { id:'bianca', nome:'Bianca', foto:'assets/photos/bianca.svg', atividades:4, meta:10 }
+        { id:'bianca', nome:'Bianca', foto:'assets/photos/Bianca.jpg', atividades:4, meta:10 }
       ],
       preVendas: [
         { id:'mariaCecilia', nome:'Maria Cecilia', foto:'assets/photos/maria-cecilia.png',
@@ -80,22 +84,22 @@ const AMV = (() => {
       ]
     },
     destaques: {
-      reunioes:  { nome:'Victor Matera',   time:'Luiza', foto:'assets/photos/victor-matera.svg', valor:7 },
-      indicacoes:{ nome:'Gisele Cristina', time:'Thaís', foto:'assets/photos/gisele.svg',        valor:1 }
+      reunioes:  { nome:'Victor Matera',   time:'Luiza', foto:'assets/photos/Victor.jpg',   valor:7 },
+      indicacoes:{ nome:'Gisele Cristina', time:'Thaís', foto:'assets/photos/Giselle.JPG',  valor:1 }
     },
     rankingAmvJunior: [
-      { pos:1, nome:'Giselle Cristina', foto:'assets/photos/gisele.svg',   vidas:143, contratos:30, periodo:'01/01/2026 a 31/12/2026' },
-      { pos:2, nome:'Matheus Prado',    foto:'assets/photos/matheus.svg',  vidas:105, contratos:21, periodo:'01/01/2026 a 31/12/2026' },
-      { pos:3, nome:'Thiago Vaz',       foto:'assets/photos/thiago.svg',   vidas:93,  contratos:26, periodo:'01/01/2026 a 31/12/2026' }
+      { pos:1, nome:'Giselle Cristina', foto:'assets/photos/Giselle.JPG',  vidas:143, contratos:30, periodo:'01/01/2026 a 31/12/2026' },
+      { pos:2, nome:'Matheus Prado',    foto:'assets/photos/Matheus.jpg',  vidas:105, contratos:21, periodo:'01/01/2026 a 31/12/2026' },
+      { pos:3, nome:'Thiago Vaz',       foto:'assets/photos/Thiago.JPG',   vidas:93,  contratos:26, periodo:'01/01/2026 a 31/12/2026' }
     ],
     rankingPleno: [
-      { pos:1, nome:'Rodrigo Veras', foto:'assets/photos/rodrigo.svg', vidas:307, contratos:34, periodo:'01/01/2026 a 31/12/2026' }
+      { pos:1, nome:'Rodrigo Veras', foto:'assets/photos/Rodrigo.png', vidas:307, contratos:34, periodo:'01/01/2026 a 31/12/2026' }
     ],
     rankingTrainee: [
-      { pos:1, nome:'Vitor Lorran',   foto:'assets/photos/vitor-lorran.svg',   vidas:39, contratos:12, periodo:'01/02/2026 a 30/06/2026' },
-      { pos:2, nome:'Kaike Augusto',  foto:'assets/photos/kaike.svg',          vidas:12, contratos:4,  periodo:'01/02/2026 a 30/06/2026' },
-      { pos:3, nome:'Victor Matera',  foto:'assets/photos/victor-matera.svg',  vidas:12, contratos:3,  periodo:'01/02/2026 a 30/06/2026' },
-      { pos:4, nome:'Kariny Coelho',  foto:'assets/photos/kariny.svg',         vidas:7,  contratos:1,  periodo:'01/02/2026 a 30/06/2026' }
+      { pos:1, nome:'Vitor Lorran',   foto:'assets/photos/Vitor.jpg',    vidas:39, contratos:12, periodo:'01/02/2026 a 30/06/2026' },
+      { pos:2, nome:'Kaike Augusto',  foto:'assets/photos/Kaike.jpg',    vidas:12, contratos:4,  periodo:'01/02/2026 a 30/06/2026' },
+      { pos:3, nome:'Victor Matera',  foto:'assets/photos/Victor.jpg',   vidas:12, contratos:3,  periodo:'01/02/2026 a 30/06/2026' },
+      { pos:4, nome:'Kariny Coelho',  foto:'assets/photos/Kariny.JPG',   vidas:7,  contratos:1,  periodo:'01/02/2026 a 30/06/2026' }
     ]
   };
 

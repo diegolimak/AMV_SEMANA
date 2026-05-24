@@ -573,6 +573,72 @@ img { display:block; }
 /* ════ RANK-ITEM STAGGER ════ */
 .rank-item.step-item { transform:translateX(-14px); }
 .rank-item.step-item.revealed { transform:none; }
+
+/* ════════════════════════════════════════════
+   SLIDE EQUIPE AMV — dois times juntos
+   ════════════════════════════════════════════ */
+.equipe-container {
+  display:grid; grid-template-columns:1fr 1px 1fr;
+  gap:0; margin-top:18px; flex:1; min-height:0;
+}
+.equipe-divider {
+  background:linear-gradient(180deg,transparent,rgba(126,200,227,.2) 20%,rgba(126,200,227,.2) 80%,transparent);
+  align-self:stretch;
+}
+.equipe-col {
+  padding:0 28px; display:flex; flex-direction:column; gap:16px; overflow:hidden;
+}
+.equipe-col.step-item { transform:translateY(14px) scale(.99); }
+.equipe-col.step-item.revealed { transform:none; }
+
+/* Header da gestora */
+.equipe-team-header {
+  display:flex; align-items:center; gap:16px;
+  padding-bottom:14px;
+  border-bottom:1px solid rgba(126,200,227,.12);
+}
+.equipe-manager-wrap { position:relative; width:72px; height:72px; flex-shrink:0; }
+.equipe-manager-ring {
+  position:absolute; inset:-3px; border-radius:50%;
+  background:conic-gradient(var(--light) 0deg,var(--blue) 120deg,rgba(126,200,227,.2) 240deg,var(--light) 360deg);
+  animation:ringRotate 6s linear infinite;
+}
+.equipe-manager-bg { position:absolute; inset:3px; border-radius:50%; background:var(--navy-dd); z-index:1; }
+.equipe-manager-photo {
+  position:absolute; inset:3px; border-radius:50%;
+  object-fit:cover; z-index:2; width:calc(100% - 6px); height:calc(100% - 6px);
+}
+.equipe-team-info {}
+.equipe-team-title {
+  font-family:'Montserrat',sans-serif; font-size:clamp(18px,1.6vw,26px); font-weight:900; color:#fff;
+}
+.equipe-team-title em { font-style:normal; color:var(--light); }
+.equipe-team-subtitle {
+  font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(255,255,255,.35); margin-top:4px;
+}
+
+/* Seção de membros */
+.equipe-members-section { display:flex; flex-direction:column; gap:8px; }
+.equipe-section-label {
+  font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(126,200,227,.4); margin-bottom:2px;
+}
+.equipe-members-row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
+.equipe-member { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.equipe-member-photo {
+  width:50px; height:50px; border-radius:50%; object-fit:cover;
+  border:2px solid rgba(126,200,227,.2);
+  transition:border-color .2s, transform .2s;
+}
+.equipe-member:hover .equipe-member-photo { border-color:rgba(126,200,227,.6); transform:scale(1.06); }
+.equipe-member-name {
+  font-size:9px; font-weight:700; color:rgba(255,255,255,.7);
+  text-align:center; max-width:62px; line-height:1.3;
+}
+.equipe-member-role {
+  font-size:8px; color:rgba(126,200,227,.5); text-transform:uppercase; letter-spacing:.04em;
+}
 </style>
 </head>
 <body>
@@ -580,7 +646,7 @@ img { display:block; }
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="tb-logo"><img src="assets/logo-horizontal-branca.png" alt="AMV"></div>
-  <div id="slide-counter"><span class="cur" id="slide-cur">01</span> / <span id="total">13</span></div>
+  <div id="slide-counter"><span class="cur" id="slide-cur">01</span> / <span id="total">14</span></div>
   <div id="step-dots"></div>
   <div class="tb-right">
     <button class="tbb" id="btn-fs" title="Tela cheia">⛶</button>
@@ -624,7 +690,20 @@ img { display:block; }
   </div>
 </section>
 
-<!-- ──────── S03 TIME THAÍS GERAL ──────── -->
+<!-- ──────── S03 A EQUIPE AMV ──────── -->
+<section class="slide bg-dark" id="s-equipe" data-index="2">
+  <div class="slide-inner">
+    <div class="section-tag"><span class="live-dot"></span>Nossa Equipe</div>
+    <h2 class="slide-h" style="font-size:clamp(28px,3.5vw,48px);">A <em>Equipe</em> AMV 💙</h2>
+    <div class="equipe-container">
+      <div class="equipe-col step-item" data-step="0" id="equipe-thais"></div>
+      <div class="equipe-divider"></div>
+      <div class="equipe-col step-item" data-step="1" id="equipe-luiza"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── S04 TIME THAÍS GERAL ──────── -->
 <section class="slide bg-team" id="s03" data-index="2">
   <div class="slide-inner">
     <div class="section-tag"><span class="live-dot"></span>Números da Semana</div>
@@ -766,7 +845,7 @@ img { display:block; }
    STATE
    ══════════════════════════════════════════════ */
 const D = AMV.load();
-const TOTAL = 13;
+const TOTAL = 14;
 let current = 0;
 let step    = 0;   // passo atual dentro do slide
 const slides = [...document.querySelectorAll('.slide')];
@@ -775,8 +854,11 @@ const charts = {};
 /* ── Máximo de passos por slide (índice do último step-item) ──
    -1 = nenhum reveal, avança no 1º clique
     0 = 1 item revelado na entrada, 1º clique avança
-    N = N+1 itens revelados um a um */
-const MAX_STEP = [-1, 3, 5, 3, 2, 5, 3, 1, 1, 2, 0, 3, -1];
+    N = N+1 itens revelados um a um
+   idx: 0=capa, 1=alinhamentos, 2=equipe, 3=KPIThais, 4=ConsulThais,
+        5=SupThais, 6=KPILuiza, 7=ConsulLuiza, 8=SupLuiza,
+        9=destaques, 10=rankAMV, 11=rankPleno, 12=rankTrainee, 13=fim */
+const MAX_STEP = [-1, 3, 1, 5, 3, 2, 5, 3, 1, 1, 2, 0, 3, -1];
 
 /* ── UTILS ── */
 const $ = id => document.getElementById(id);
@@ -1016,6 +1098,52 @@ function renderCover() {
   </div>`).join('');
 }
 
+function renderEquipe() {
+  function buildCol(team, gestoraNome, gestoraFoto, accentColor) {
+    const consul = team.consultores.map(c => `
+      <div class="equipe-member">
+        <img class="equipe-member-photo" src="${foto(c.foto)}" alt="${c.nome}" onerror="this.src='assets/photos/placeholder.svg'">
+        <span class="equipe-member-name">${c.nome.split(' ')[0]}</span>
+        <span class="equipe-member-role">${c.tipo}</span>
+      </div>`).join('');
+
+    const suporte = [
+      ...team.backoffice.map(m => ({...m, role:'backoffice'})),
+      ...team.preVendas.map(m => ({...m, role:'pré-vendas'}))
+    ].map(m => `
+      <div class="equipe-member">
+        <img class="equipe-member-photo" src="${foto(m.foto)}" alt="${m.nome}" onerror="this.src='assets/photos/placeholder.svg'">
+        <span class="equipe-member-name">${m.nome.split(' ')[0]}</span>
+        <span class="equipe-member-role">${m.role}</span>
+      </div>`).join('');
+
+    return `
+      <div class="equipe-team-header">
+        <div class="equipe-manager-wrap">
+          <div class="equipe-manager-ring" style="background:conic-gradient(${accentColor} 0deg,var(--blue) 120deg,rgba(126,200,227,.2) 240deg,${accentColor} 360deg)"></div>
+          <div class="equipe-manager-bg"></div>
+          <img class="equipe-manager-photo" src="${gestoraFoto}" alt="${gestoraNome}" onerror="this.src='assets/photos/placeholder.svg'">
+        </div>
+        <div class="equipe-team-info">
+          <div class="equipe-team-title">Time <em style="color:${accentColor}">${gestoraNome}</em></div>
+          <div class="equipe-team-subtitle">Gestora de Equipe</div>
+        </div>
+      </div>
+      <div class="equipe-members-section">
+        <div class="equipe-section-label">Consultores</div>
+        <div class="equipe-members-row">${consul}</div>
+      </div>
+      <div class="equipe-members-section">
+        <div class="equipe-section-label">Suporte & Pré-Vendas</div>
+        <div class="equipe-members-row">${suporte}</div>
+      </div>`;
+  }
+
+  const g = D.gestoras || { thais:{ foto:'assets/photos/Thais.jpg' }, luiza:{ foto:'assets/photos/Luiza.jpg' } };
+  $('equipe-thais').innerHTML = buildCol(D.timeThais, 'Thaís', g.thais.foto, 'var(--light)');
+  $('equipe-luiza').innerHTML = buildCol(D.timeLuiza, 'Luiza', g.luiza.foto, '#a78bfa');
+}
+
 function renderAlinhamentos() {
   $('align-list').innerHTML = (D.alinhamentos||[]).map((a,i)=>`
     <div class="align-card step-item" data-step="${i}">
@@ -1217,18 +1345,19 @@ function onEnter(idx) {
   slides[idx].querySelectorAll('.step-item').forEach(el => el.classList.remove('revealed'));
 
   switch(idx) {
-    case 0: renderCover(); break;
-    case 1: renderAlinhamentos(); break;
-    case 2: renderKPI(D.timeThais,'thais-kpi','thais-extra'); break;
-    case 3: renderConsultores(D.timeThais.consultores,'thais-consul'); break;
-    case 4: renderSupporte(D.timeThais,'thais-suporte'); break;
-    case 5: renderKPI(D.timeLuiza,'luiza-kpi','luiza-extra'); break;
-    case 6: renderConsultores(D.timeLuiza.consultores,'luiza-consul'); break;
-    case 7: renderSupporte(D.timeLuiza,'luiza-suporte'); break;
-    case 8: renderDestaques(); break;
-    case 9:  renderRanking(D.rankingAmvJunior,'rank-amv','rank-amv-periodo'); break;
-    case 10: renderRanking(D.rankingPleno,'rank-pleno','rank-pleno-periodo'); break;
-    case 11: renderRanking(D.rankingTrainee,'rank-trainee','rank-trainee-periodo'); break;
+    case 0:  renderCover(); break;
+    case 1:  renderAlinhamentos(); break;
+    case 2:  renderEquipe(); break;
+    case 3:  renderKPI(D.timeThais,'thais-kpi','thais-extra'); break;
+    case 4:  renderConsultores(D.timeThais.consultores,'thais-consul'); break;
+    case 5:  renderSupporte(D.timeThais,'thais-suporte'); break;
+    case 6:  renderKPI(D.timeLuiza,'luiza-kpi','luiza-extra'); break;
+    case 7:  renderConsultores(D.timeLuiza.consultores,'luiza-consul'); break;
+    case 8:  renderSupporte(D.timeLuiza,'luiza-suporte'); break;
+    case 9:  renderDestaques(); break;
+    case 10: renderRanking(D.rankingAmvJunior,'rank-amv','rank-amv-periodo'); break;
+    case 11: renderRanking(D.rankingPleno,'rank-pleno','rank-pleno-periodo'); break;
+    case 12: renderRanking(D.rankingTrainee,'rank-trainee','rank-trainee-periodo'); break;
   }
   // Revela passo 0 (primeiro item)
   revealStep(idx, 0);
